@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>土圭法测光影模拟实验平台 - 常州地区</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            width: 100%;
+            height: auto;
+            min-height: 90vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            flex-direction: column;
+        }
+
+        .data-panel {
+            width: 100%;
+            background: linear-gradient(160deg, #2c3e50, #1a237e);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: #4fc3f7;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .data-display {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .data-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .data-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .data-label {
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #81d4fa;
+        }
+
+        .data-value {
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        .explanation {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .explanation p {
+            margin-bottom: 8px;
+        }
+
+        .explanation .highlight {
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+
+        .simulation-area {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        .simulation-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .simulation-header h2 {
+            color: #2c3e50;
+            font-size: 26px;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #1a2980, #26d0ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: #e9f7fe;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #c5e8f7;
+            min-height: 300px;
+            width: 100%;
+        }
+
+        #simulationCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .slider-container label {
+            min-width: 110px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 20px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #26d0ce, #1a2980);
+            outline: none;
+            -webkit-appearance: none;
+            min-width: 150px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1a2980;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1a2980;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-value {
+            min-width: 60px;
+            font-weight: bold;
+            color: #1a2980;
+            font-size: 16px;
+        }
+
+        .info-text {
+            text-align: center;
+            margin-top: 12px;
+            margin-bottom: 5px;
+            font-style: italic;
+            color: #5a6268;
+            font-size: 14px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            line-height: 1.4;
+        }
+
+        .info-text strong {
+            color: #1a2980;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        /* 平板和电脑样式 */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                height: 90vh;
+                max-height: 90vh;
+            }
+
+            .data-panel {
+                width: 280px;
+                padding: 25px;
+                justify-content: space-between;
+                overflow-y: auto;
+            }
+
+            .header {
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .header p {
+                font-size: 14px;
+            }
+
+            .data-display {
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 25px;
+            }
+
+            .data-item {
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+            }
+
+            .data-label {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .data-value {
+                font-size: 32px;
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            .explanation {
+                border-radius: 15px;
+                padding: 20px;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .simulation-area {
+                padding: 25px;
+                overflow-y: auto;
+            }
+
+            .simulation-header {
+                margin-bottom: 20px;
+            }
+
+            .simulation-header h2 {
+                font-size: 32px;
+                margin-bottom: 10px;
+            }
+
+            .canvas-container {
+                border-radius: 15px;
+                min-height: 450px;
+            }
+
+            .controls {
+                margin-top: 20px;
+                gap: 15px;
+            }
+
+            .slider-container {
+                gap: 15px;
+                padding: 15px;
+                border-radius: 12px;
+            }
+
+            .slider-container label {
+                min-width: 140px;
+                font-size: 18px;
+            }
+
+            input[type="range"] {
+                height: 20px;
+                border-radius: 10px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 32px;
+                height: 32px;
+            }
+
+            .info-text {
+                margin-top: 15px;
+                font-size: 16px;
+                padding: 12px 10px;
+                border-radius: 10px;
+                line-height: 1.5;
+            }
+
+            .legend {
+                gap: 30px;
+                margin-top: 20px;
+            }
+
+            .legend-item {
+                gap: 8px;
+                font-size: 14px;
+            }
+
+            .legend-color {
+                width: 20px;
+                height: 20px;
+                border-radius: 4px;
+            }
+        }
+
+        /* 大屏幕电脑样式 */
+        @media (min-width: 1200px) {
+            .canvas-container {
+                min-height: 500px;
+            }
+        }
+
+        /* 平板设备特定优化 */
+        @media (max-width: 1024px) and (min-width: 768px) {
+            .container {
+                height: 95vh;
+                max-height: 95vh;
+            }
+
+            .data-panel {
+                width: 250px;
+                padding: 20px;
+            }
+
+            .simulation-area {
+                padding: 20px;
+            }
+
+            .canvas-container {
+                min-height: 400px;
+            }
+
+            .slider-container {
+                padding: 15px;
+            }
+
+            input[type="range"] {
+                height: 24px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 36px;
+                height: 36px;
+            }
+        }
+
+        /* 手机设备特定优化 */
+        @media (max-width: 767px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                min-height: auto;
+                height: auto;
+                border-radius: 15px;
+            }
+
+            .data-panel {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            .data-value {
+                font-size: 22px;
+            }
+
+            .canvas-container {
+                min-height: 350px;
+            }
+
+            .simulation-header h2 {
+                font-size: 22px;
+            }
+
+            .slider-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .slider-container label {
+                min-width: auto;
+                text-align: center;
+            }
+
+            input[type="range"] {
+                height: 24px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 36px;
+                height: 36px;
+            }
+
+            .legend {
+                gap: 15px;
+            }
+
+            .legend-item {
+                font-size: 12px;
+            }
+        }
+
+        /* 特别针对平板横屏的优化 */
+        @media (max-width: 1024px) and (min-width: 768px) and (orientation: landscape) {
+            .container {
+                height: 98vh;
+                max-height: 98vh;
+            }
+
+            .data-panel {
+                width: 220px;
+                padding: 15px;
+            }
+
+            .simulation-area {
+                padding: 15px;
+            }
+
+            .canvas-container {
+                min-height: 350px;
+            }
+        }
+
+        /* 小屏幕手机优化 */
+        @media (max-width: 375px) {
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .simulation-header h2 {
+                font-size: 20px;
+            }
+
+            .canvas-container {
+                min-height: 300px;
+            }
+
+            .legend {
+                gap: 10px;
+            }
+
+            .legend-item {
+                font-size: 11px;
+            }
+        }
+
+        /* 拖动时的光标样式 */
+        .dragging-sun {
+            cursor: grabbing !important;
+        }
+
+        .dragging-shadow {
+            cursor: grabbing !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="data-panel">
+            <div>
+                <div class="header">
+                    <h1>土圭法测光影实验</h1>
+                    <p>常州地区太阳高度角与影子长度关系模拟</p>
+                </div>
+
+                <div class="data-display">
+                    <div class="data-item">
+                        <div class="data-label">
+                            📏 表高度
+                        </div>
+                        <div class="data-value" id="tableHeightValue">80.0 cm</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">
+                            📐 太阳高度角
+                        </div>
+                        <div class="data-value" id="sunAngleValue">58.0°</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">
+                            🌑 影子长度
+                        </div>
+                        <div class="data-value" id="shadowValue">50.0 cm</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <p>土圭是最古老的计时仪器之一，利用表（垂直杆）投射在圭（水平尺）上的影子长度来测定时间和节气。</p>
+                <p class="highlight" style="margin-top: 10px;">方向说明：圭尺右侧朝正北方向，符合实际土圭法的使用方式。</p>
+                <p style="margin-top: 8px; font-size: 12px; opacity: 0.9;">常州纬度：31.78°N</p>
+            </div>
+        </div>
+
+        <div class="simulation-area">
+            <div class="simulation-header">
+                <h2>圭表测影模拟</h2>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="simulationCanvas"></canvas>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF5252;"></div>
+                    <span>可拖动的影子终点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FFD700;"></div>
+                    <span>可拖动的太阳</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2196F3;"></div>
+                    <span>太阳光线</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e53935;"></div>
+                    <span>正北方向</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="slider-container">
+                    <label for="shadowSlider">🌑 影子长度：</label>
+                    <input type="range" id="shadowSlider" min="12" max="116" value="50" step="0.5">
+                    <span class="slider-value" id="shadowSliderValue">50 cm</span>
+                </div>
+                <div class="slider-container">
+                    <label for="sunAngleSlider">☀️ 太阳高度角：</label>
+                    <input type="range" id="sunAngleSlider" min="34.6" max="81.5" value="58.0" step="0.1">
+                    <span class="slider-value" id="sunAngleSliderValue">58.0°</span>
+                </div>
+            </div>
+
+            <div class="info-text">
+                💡 拖动滑块调整数值，或直接拖动红色影子终点，也可以拖动太阳改变光线角度。
+                <strong>圭尺右侧朝正北方向，符合实际土圭法的使用方式。</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取Canvas元素和上下文
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 获取显示元素
+        const shadowValue = document.getElementById('shadowValue');
+        const tableHeightValue = document.getElementById('tableHeightValue');
+        const sunAngleValue = document.getElementById('sunAngleValue');
+        const shadowSliderValue = document.getElementById('shadowSliderValue');
+        const sunAngleSliderValue = document.getElementById('sunAngleSliderValue');
+
+        // 获取滑块元素
+        const shadowSlider = document.getElementById('shadowSlider');
+        const sunAngleSlider = document.getElementById('sunAngleSlider');
+
+        // 常量设置 - 统一使用厘米单位
+        const TABLE_HEIGHT_CM = 80; // 表的高度（厘米）
+        const PIXELS_PER_CM = 2.5; // 每厘米对应的像素数（自适应调整）
+        let TABLE_HEIGHT_PX = TABLE_HEIGHT_CM * PIXELS_PER_CM; // 表的高度（像素）
+
+        // 动态计算原点位置
+        let ORIGIN_X = 400;    // 表的位置（x坐标）
+        let ORIGIN_Y = 450;    // 圭的位置（y坐标）
+        const SUN_RADIUS = 25;   // 太阳半径
+        const GUI_MAX_LENGTH_CM = 200; // 圭尺最大长度（厘米）
+        let GUI_MAX_LENGTH_PX = GUI_MAX_LENGTH_CM * PIXELS_PER_CM; // 圭尺最大长度（像素）
+
+        // ✅ 用户指定的参数
+        const MIN_ANGLE = 34.6;  // 最小太阳高度角（度）
+        const MAX_ANGLE = 81.5;  // 最大太阳高度角（度）
+        const MIN_SHADOW_CM = 12;   // 最小影子长度（厘米）- 对应 81.5°
+        const MAX_SHADOW_CM = 116;  // 最大影子长度（厘米）- 对应 34.6°
+
+        console.log("用户指定的参数:");
+        console.log("太阳高度角范围:", MIN_ANGLE, "° -", MAX_ANGLE, "°");
+        console.log("影子长度范围:", MIN_SHADOW_CM, "cm -", MAX_SHADOW_CM, "cm");
+        console.log("验证:");
+        console.log("  80cm 表高, 81.5° 太阳角 → 影子 = 80 / tan(81.5°) ≈",
+            Math.round(80 / Math.tan(81.5 * Math.PI / 180)), "cm");
+        console.log("  80cm 表高, 34.6° 太阳角 → 影子 = 80 / tan(34.6°) ≈",
+            Math.round(80 / Math.tan(34.6 * Math.PI / 180)), "cm");
+
+        // 初始值（中间值）
+        let sunAngle = 58.0; // 太阳高度角（度）- 34.6 和 81.5 的中间值
+        let shadowLengthCm = 50.0; // 影子长度（厘米）- 12 和 116 的中间值
+        let isDraggingShadow = false;
+        let isDraggingSun = false;
+        let sunPosition = { x: 0, y: 0 };
+
+        // 调整Canvas大小和原点位置
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.width = container.clientWidth * dpr;
+            canvas.height = container.clientHeight * dpr;
+
+            // 设置CSS尺寸
+            canvas.style.width = container.clientWidth + 'px';
+            canvas.style.height = container.clientHeight + 'px';
+
+            // 根据画布大小动态调整比例
+            const minDimension = Math.min(container.clientWidth, container.clientHeight);
+            const adaptiveScale = Math.max(1.5, minDimension / 300);
+
+            TABLE_HEIGHT_PX = TABLE_HEIGHT_CM * adaptiveScale;
+            GUI_MAX_LENGTH_PX = GUI_MAX_LENGTH_CM * adaptiveScale;
+
+            // 根据画布大小动态调整原点位置
+            const isTablet = window.matchMedia("(max-width: 1024px) and (min-width: 768px)").matches;
+            const isMobile = window.innerWidth <= 767;
+
+            if (isMobile) {
+                ORIGIN_X = container.clientWidth * 0.45;
+                ORIGIN_Y = container.clientHeight * 0.75;
+            } else if (isTablet) {
+                ORIGIN_X = container.clientWidth * 0.5;
+                ORIGIN_Y = container.clientHeight * 0.75;
+            } else {
+                ORIGIN_X = container.clientWidth * 0.5;
+                ORIGIN_Y = container.clientHeight * 0.8;
+            }
+
+            // 应用设备像素比
+            ctx.scale(dpr, dpr);
+
+            updateSunPosition();
+            drawSimulation();
+        }
+
+        // 更新太阳位置
+        function updateSunPosition() {
+            const angleRad = sunAngle * Math.PI / 180;
+
+            // 计算太阳到表的距离，确保太阳始终在画布内
+            const minDistance = 120;  // 夏至时的最小距离
+            const maxDistance = 280;  // 冬至时的最大距离
+
+            // 根据太阳角度计算距离（角度越小，距离越大）
+            let sunDistance = minDistance + (maxDistance - minDistance) *
+                         (1 - (sunAngle - MIN_ANGLE) / (MAX_ANGLE - MIN_ANGLE));
+
+            // 根据角度计算太阳位置
+            sunPosition.x = ORIGIN_X - sunDistance * Math.cos(angleRad);
+            sunPosition.y = ORIGIN_Y - TABLE_HEIGHT_PX - sunDistance * Math.sin(angleRad);
+        }
+
+        // 绘制整个模拟场景
+        function drawSimulation() {
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
+
+            // 计算影子终点（转换为像素）
+            const shadowLengthPx = shadowLengthCm * (TABLE_HEIGHT_PX / TABLE_HEIGHT_CM);
+            const shadowX = ORIGIN_X + shadowLengthPx;
+            const shadowY = ORIGIN_Y;
+
+            // 表顶端位置
+            const tableTopX = ORIGIN_X;
+            const tableTopY = ORIGIN_Y - TABLE_HEIGHT_PX;
+
+            // 绘制背景
+            drawBackground();
+
+            // 绘制圭（水平尺）- 限制长度为200厘米
+            drawGui();
+
+            // 绘制表（垂直杆）
+            drawTable();
+
+            // 绘制光线
+            drawLightRays(sunPosition.x, sunPosition.y, tableTopX, tableTopY, shadowX, shadowY);
+
+            // 绘制太阳
+            drawSun(sunPosition.x, sunPosition.y);
+
+            // 绘制影子
+            drawShadow(shadowX, shadowY);
+
+            // 绘制角度标注
+            drawAngleArc(tableTopX, tableTopY, shadowX, shadowY, sunPosition.x, sunPosition.y);
+        }
+
+        // 绘制背景
+        function drawBackground() {
+            const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+
+            // 天空渐变
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, ORIGIN_Y);
+            skyGradient.addColorStop(0, '#64b5f6');
+            skyGradient.addColorStop(0.6, '#bbdefb');
+            skyGradient.addColorStop(0.8, '#e3f2fd');
+
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, width, ORIGIN_Y);
+
+            // 地面
+            ctx.fillStyle = '#7cb342';
+            ctx.fillRect(0, ORIGIN_Y, width, height - ORIGIN_Y);
+
+            // 地面纹理
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.setLineDash([5, 15]);
+            ctx.beginPath();
+            ctx.moveTo(0, ORIGIN_Y + 0.5);
+            ctx.lineTo(width, ORIGIN_Y + 0.5);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // 绘制圭（水平尺）
+        function drawGui() {
+            const guiEndX = ORIGIN_X + GUI_MAX_LENGTH_PX;
+
+            // 圭尺主体（木质纹理）
+            const woodGradient = ctx.createLinearGradient(0, ORIGIN_Y - 8, 0, ORIGIN_Y + 8);
+            woodGradient.addColorStop(0, '#4a3728');
+            woodGradient.addColorStop(0.5, '#6d4c41');
+            woodGradient.addColorStop(1, '#4a3728');
+
+            ctx.fillStyle = woodGradient;
+            ctx.fillRect(ORIGIN_X - 50, ORIGIN_Y - 8, GUI_MAX_LENGTH_PX + 50, 16);
+
+            // 圭尺边框
+            ctx.strokeStyle = '#3e2723';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(ORIGIN_X - 50, ORIGIN_Y - 8, GUI_MAX_LENGTH_PX + 50, 16);
+
+            // 圭尺刻度
+            ctx.strokeStyle = '#FFF';
+            ctx.lineWidth = 2;
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#FFF';
+
+            const scaleStep = 20 * (TABLE_HEIGHT_PX / TABLE_HEIGHT_CM);
+
+            for (let x = ORIGIN_X; x <= guiEndX; x += scaleStep) {
+                // 刻度线
+                ctx.beginPath();
+                ctx.moveTo(x, ORIGIN_Y - 8);
+                ctx.lineTo(x, ORIGIN_Y - 18);
+                ctx.stroke();
+
+                // 主要刻度（每100厘米）
+                if (Math.round((x - ORIGIN_X) / scaleStep) % 5 === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, ORIGIN_Y - 8);
+                    ctx.lineTo(x, ORIGIN_Y - 28);
+                    ctx.stroke();
+
+                    // 刻度值
+                    const cmValue = Math.round((x - ORIGIN_X) / scaleStep * 20);
+                    ctx.fillText(cmValue.toString(), x, ORIGIN_Y - 35);
+                }
+            }
+
+            // 圭尺标签
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#FFF';
+            ctx.fillText('圭 (水平尺)', ORIGIN_X + GUI_MAX_LENGTH_PX/2, ORIGIN_Y + 30);
+
+            // 北方向标注
+            ctx.fillStyle = '#e53935';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('北', guiEndX + 40, ORIGIN_Y);
+
+            // 南方向标注
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('南', ORIGIN_X - 80, ORIGIN_Y);
+
+            // 绘制北方向箭头（红色）
+            ctx.strokeStyle = '#e53935';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(guiEndX + 15, ORIGIN_Y);
+            ctx.lineTo(guiEndX + 30, ORIGIN_Y);
+            // 箭头头部
+            ctx.moveTo(guiEndX + 30, ORIGIN_Y);
+            ctx.lineTo(guiEndX + 22, ORIGIN_Y - 7);
+            ctx.moveTo(guiEndX + 30, ORIGIN_Y);
+            ctx.lineTo(guiEndX + 22, ORIGIN_Y + 7);
+            ctx.stroke();
+
+            // 绘制南方向箭头
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(ORIGIN_X - 55, ORIGIN_Y);
+            ctx.lineTo(ORIGIN_X - 70, ORIGIN_Y);
+            // 箭头头部
+            ctx.moveTo(ORIGIN_X - 70, ORIGIN_Y);
+            ctx.lineTo(ORIGIN_X - 62, ORIGIN_Y - 7);
+            ctx.moveTo(ORIGIN_X - 70, ORIGIN_Y);
+            ctx.lineTo(ORIGIN_X - 62, ORIGIN_Y + 7);
+            ctx.stroke();
+        }
+
+        // 绘制表（垂直杆）
+        function drawTable() {
+            // 表杆渐变（金属质感）
+            const gradient = ctx.createLinearGradient(ORIGIN_X - 12, 0, ORIGIN_X + 12, 0);
+            gradient.addColorStop(0, '#3e2723');
+            gradient.addColorStop(0.5, '#6d4c41');
+            gradient.addColorStop(1, '#3e2723');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(ORIGIN_X - 10, ORIGIN_Y - TABLE_HEIGHT_PX, 20, TABLE_HEIGHT_PX);
+
+            // 表杆阴影
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(ORIGIN_X + 10, ORIGIN_Y - TABLE_HEIGHT_PX, 3, TABLE_HEIGHT_PX);
+
+            // 表顶装饰环
+            ctx.fillStyle = '#5d4037';
+            ctx.beginPath();
+            ctx.ellipse(ORIGIN_X, ORIGIN_Y - TABLE_HEIGHT_PX, 16, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 表顶圆球（模拟观测点）
+            const ballGradient = ctx.createRadialGradient(
+                ORIGIN_X - 4, ORIGIN_Y - TABLE_HEIGHT_PX - 4, 3,
+                ORIGIN_X, ORIGIN_Y - TABLE_HEIGHT_PX, 14
+            );
+            ballGradient.addColorStop(0, '#ffeb3b');
+            ballGradient.addColorStop(1, '#f57f17');
+
+            ctx.fillStyle = ballGradient;
+            ctx.beginPath();
+            ctx.arc(ORIGIN_X, ORIGIN_Y - TABLE_HEIGHT_PX, 12, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 圆球高光
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.beginPath();
+            ctx.arc(ORIGIN_X - 4, ORIGIN_Y - TABLE_HEIGHT_PX - 4, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 表标签
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('表 (垂直杆)', ORIGIN_X, ORIGIN_Y - TABLE_HEIGHT_PX - 35);
+
+            // 表高度标注
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'right';
+            ctx.fillText(TABLE_HEIGHT_CM + ' cm', ORIGIN_X - 18, ORIGIN_Y - TABLE_HEIGHT_PX/2);
+        }
+
+        // 绘制太阳
+        function drawSun(x, y) {
+            // 太阳光晕（外圈）
+            const outerGlow = ctx.createRadialGradient(x, y, 0, x, y, SUN_RADIUS * 3);
+            outerGlow.addColorStop(0, 'rgba(255, 200, 50, 0.4)');
+            outerGlow.addColorStop(0.5, 'rgba(255, 180, 0, 0.2)');
+            outerGlow.addColorStop(1, 'rgba(255, 180, 0, 0)');
+
+            ctx.fillStyle = outerGlow;
+            ctx.beginPath();
+            ctx.arc(x, y, SUN_RADIUS * 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 太阳光晕（内圈）
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, SUN_RADIUS * 2);
+            gradient.addColorStop(0, 'rgba(255, 255, 100, 1)');
+            gradient.addColorStop(0.5, 'rgba(255, 220, 50, 0.8)');
+            gradient.addColorStop(1, 'rgba(255, 200, 0, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, SUN_RADIUS * 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 太阳本体
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(x, y, SUN_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 太阳边框
+            ctx.strokeStyle = '#FFA000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x, y, SUN_RADIUS, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 太阳光芒
+            ctx.strokeStyle = 'rgba(255, 180, 0, 0.6)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 12; i++) {
+                const angle = (i * 30) * Math.PI / 180;
+                const startX = x + (SUN_RADIUS + 3) * Math.cos(angle);
+                const startY = y + (SUN_RADIUS + 3) * Math.sin(angle);
+                const endX = x + (SUN_RADIUS + 18) * Math.cos(angle);
+                const endY = y + (SUN_RADIUS + 18) * Math.sin(angle);
+
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+            }
+
+            // 太阳标签
+            ctx.fillStyle = '#E65100';
+            ctx.font = 'bold 13px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('☀️ 太阳', x, y - SUN_RADIUS - 18);
+            ctx.font = '12px Arial';
+            ctx.fillText('(可拖动)', x, y - SUN_RADIUS - 6);
+        }
+
+        // 绘制光线
+        function drawLightRays(sunX, sunY, tableTopX, tableTopY, shadowX, shadowY) {
+            // 光线路径：从太阳到表顶再到影子终点
+            ctx.strokeStyle = 'rgba(33, 150, 243, 0.7)';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(sunX, sunY);
+            ctx.lineTo(tableTopX, tableTopY);
+            ctx.lineTo(shadowX, shadowY);
+            ctx.stroke();
+
+            // 光线发光效果
+            ctx.strokeStyle = 'rgba(255, 255, 200, 0.4)';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(sunX, sunY);
+            ctx.lineTo(tableTopX, tableTopY);
+            ctx.lineTo(shadowX, shadowY);
+            ctx.stroke();
+
+            // 表顶光点
+            ctx.fillStyle = 'rgba(255, 255, 200, 0.8)';
+            ctx.beginPath();
+            ctx.arc(tableTopX, tableTopY, 6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 绘制影子
+        function drawShadow(shadowX, shadowY) {
+            // 影子渐变（从深到浅）
+            const shadowGradient = ctx.createLinearGradient(ORIGIN_X, ORIGIN_Y - 3, shadowX, shadowY + 3);
+            shadowGradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+            shadowGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+
+            ctx.fillStyle = shadowGradient;
+            ctx.fillRect(ORIGIN_X, ORIGIN_Y - 3, shadowX - ORIGIN_X, 6);
+
+            // 影子边框
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(ORIGIN_X, ORIGIN_Y - 3, shadowX - ORIGIN_X, 6);
+
+            // 可拖动点（外圈）
+            ctx.fillStyle = 'rgba(255, 82, 82, 0.3)';
+            ctx.beginPath();
+            ctx.arc(shadowX, shadowY, 15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 可拖动点（内圈）
+            ctx.fillStyle = '#FF5252';
+            ctx.beginPath();
+            ctx.arc(shadowX, shadowY, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 点内白色
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath();
+            ctx.arc(shadowX, shadowY, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 拖动提示圆圈（动画效果）
+            const time = Date.now() / 1000;
+            const pulseRadius = 15 + Math.sin(time * 3) * 3;
+            ctx.strokeStyle = 'rgba(255, 82, 82, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(shadowX, shadowY, pulseRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 影子长度标签
+            ctx.fillStyle = '#D32F2F';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('📍 影子终点', shadowX, shadowY - 22);
+            ctx.font = '12px Arial';
+            ctx.fillText('(可拖动)', shadowX, shadowY - 10);
+
+            // 影子长度标注
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 13px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(shadowLengthCm.toFixed(1) + ' cm', (ORIGIN_X + shadowX)/2, ORIGIN_Y + 18);
+        }
+
+        // 绘制角度弧线
+        function drawAngleArc(tableTopX, tableTopY, shadowX, shadowY, sunX, sunY) {
+            const radius = 40;
+            const angleRad = sunAngle * Math.PI / 180;
+
+            // 绘制太阳高度角弧线
+            ctx.strokeStyle = 'rgba(33, 150, 243, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.arc(tableTopX, tableTopY, radius, -angleRad, 0);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 角度标注
+            const labelX = tableTopX + (radius + 20) * Math.cos(-angleRad / 2);
+            const labelY = tableTopY + (radius + 20) * Math.sin(-angleRad / 2);
+
+            ctx.fillStyle = '#1565C0';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(sunAngle.toFixed(1) + '°', labelX, labelY);
+        }
+
+        // 更新显示值
+        function updateDisplayValues() {
+            shadowValue.textContent = shadowLengthCm.toFixed(1) + ' cm';
+            tableHeightValue.textContent = TABLE_HEIGHT_CM.toFixed(1) + ' cm';
+            sunAngleValue.textContent = sunAngle.toFixed(1) + '°';
+            shadowSliderValue.textContent = shadowLengthCm.toFixed(1) + ' cm';
+            sunAngleSliderValue.textContent = sunAngle.toFixed(1) + '°';
+        }
+
+        // 计算影子终点坐标（像素）
+        function getShadowPoint() {
+            const shadowLengthPx = shadowLengthCm * (TABLE_HEIGHT_PX / TABLE_HEIGHT_CM);
+            return {
+                x: ORIGIN_X + shadowLengthPx,
+                y: ORIGIN_Y
+            };
+        }
+
+        // 检查是否点击在影子终点上
+        function isPointOnShadow(x, y) {
+            const shadowPoint = getShadowPoint();
+            const distance = Math.sqrt(Math.pow(x - shadowPoint.x, 2) + Math.pow(y - shadowPoint.y, 2));
+            return distance <= 20;
+        }
+
+        // 检查是否点击在太阳上
+        function isPointOnSun(x, y) {
+            const distance = Math.sqrt(Math.pow(x - sunPosition.x, 2) + Math.pow(y - sunPosition.y, 2));
+            return distance <= SUN_RADIUS + 5;
+        }
+
+        // 根据太阳位置计算角度
+        function calculateAngleFromSunPosition(x, y) {
+            const dx = ORIGIN_X - x;
+            const dy = (ORIGIN_Y - TABLE_HEIGHT_PX) - y;
+            let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+            // 限制角度在MIN_ANGLE到MAX_ANGLE之间
+            return Math.max(MIN_ANGLE, Math.min(MAX_ANGLE, angle));
+        }
+
+        // 获取鼠标/触摸坐标
+        function getPointerPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+
+            if (e.touches && e.touches.length > 0) {
+                return {
+                    x: (e.touches[0].clientX - rect.left),
+                    y: (e.touches[0].clientY - rect.top)
+                };
+            }
+            return {
+                x: (e.clientX - rect.left),
+                y: (e.clientY - rect.top)
+            };
+        }
+
+        // 处理鼠标/触摸按下事件
+        function handlePointerDown(e) {
+            e.preventDefault();
+            const pos = getPointerPosition(e);
+
+            if (isPointOnShadow(pos.x, pos.y)) {
+                isDraggingShadow = true;
+                canvas.classList.add('dragging-shadow');
+            } else if (isPointOnSun(pos.x, pos.y)) {
+                isDraggingSun = true;
+                canvas.classList.add('dragging-sun');
+            }
+        }
+
+        // 处理鼠标/触摸移动事件
+        function handlePointerMove(e) {
+            if (!isDraggingShadow && !isDraggingSun) return;
+
+            e.preventDefault();
+            const pos = getPointerPosition(e);
+
+            if (isDraggingShadow) {
+                let newX = pos.x;
+                const minShadowPx = ORIGIN_X + MIN_SHADOW_CM * (TABLE_HEIGHT_PX / TABLE_HEIGHT_CM);
+                const maxShadowPx = ORIGIN_X + MAX_SHADOW_CM * (TABLE_HEIGHT_PX / TABLE_HEIGHT_CM);
+
+                newX = Math.max(minShadowPx, Math.min(newX, maxShadowPx));
+
+                shadowLengthCm = (newX - ORIGIN_X) / (TABLE_HEIGHT_PX / TABLE_HEIGHT_CM);
+                sunAngle = Math.atan(TABLE_HEIGHT_CM / shadowLengthCm) * 180 / Math.PI;
+
+                updateSunPosition();
+                shadowSlider.value = shadowLengthCm;
+                sunAngleSlider.value = sunAngle;
+
+                updateDisplayValues();
+                requestAnimationFrame(drawSimulation);
+            } else if (isDraggingSun) {
+                sunAngle = calculateAngleFromSunPosition(pos.x, pos.y);
+                shadowLengthCm = TABLE_HEIGHT_CM / Math.tan(sunAngle * Math.PI / 180);
+
+                // 确保影子长度在合理范围内
+                if (shadowLengthCm < MIN_SHADOW_CM) {
+                    shadowLengthCm = MIN_SHADOW_CM;
+                    sunAngle = Math.atan(TABLE_HEIGHT_CM / shadowLengthCm) * 180 / Math.PI;
+                } else if (shadowLengthCm > MAX_SHADOW_CM) {
+                    shadowLengthCm = MAX_SHADOW_CM;
+                    sunAngle = Math.atan(TABLE_HEIGHT_CM / shadowLengthCm) * 180 / Math.PI;
+                }
+
+                updateSunPosition();
+                shadowSlider.value = shadowLengthCm;
+                sunAngleSlider.value = sunAngle;
+
+                updateDisplayValues();
+                requestAnimationFrame(drawSimulation);
+            }
+        }
+
+        // 处理鼠标/触摸释放事件
+        function handlePointerUp() {
+            isDraggingShadow = false;
+            isDraggingSun = false;
+            canvas.classList.remove('dragging-shadow', 'dragging-sun');
+        }
+
+        // 滑块事件监听 - 影子长度
+        shadowSlider.addEventListener('input', function() {
+            shadowLengthCm = parseFloat(this.value);
+            sunAngle = Math.atan(TABLE_HEIGHT_CM / shadowLengthCm) * 180 / Math.PI;
+
+            updateSunPosition();
+            sunAngleSlider.value = sunAngle;
+            updateDisplayValues();
+            drawSimulation();
+        });
+
+        // 滑块事件监听 - 太阳高度角
+        sunAngleSlider.addEventListener('input', function() {
+            sunAngle = parseFloat(this.value);
+            shadowLengthCm = TABLE_HEIGHT_CM / Math.tan(sunAngle * Math.PI / 180);
+
+            updateSunPosition();
+            shadowSlider.value = shadowLengthCm;
+            updateDisplayValues();
+            drawSimulation();
+        });
+
+        // 鼠标事件
+        canvas.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+
+        // 触摸事件
+        canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+        window.addEventListener('touchmove', handlePointerMove, { passive: false });
+        window.addEventListener('touchend', handlePointerUp);
+
+        // 防止触摸时的默认滚动行为
+        canvas.addEventListener('touchmove', function(e) {
+            if (isDraggingShadow || isDraggingSun) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // 初始化和窗口调整
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            updateDisplayValues();
+        });
+
+        window.addEventListener('resize', function() {
+            resizeCanvas();
+        });
+
+        // 动画循环（用于绘制动态效果）
+        function animate() {
+            if (!isDraggingShadow && !isDraggingSun) {
+                drawSimulation();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // 启动动画
+        animate();
+    </script>
+</body>
+</html>
